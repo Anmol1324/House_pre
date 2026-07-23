@@ -626,7 +626,7 @@ def set_bg(image_file):
     )
 
 # Set background
-set_bg("downloaded.jpg")
+set_bg("downloaded.jpg.jpeg")
 
 # -----------------------
 # Page config
