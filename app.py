@@ -597,36 +597,36 @@
 # #             st.pyplot(fig2)
 # #     else:
 # #         st.info("Run a search to see graphs here.")
-# import streamlit as st
-# import pandas as pd
-# import joblib
-# import numpy as np
-# import base64
-# import matplotlib.pyplot as plt
+import streamlit as st
+import pandas as pd
+import joblib
+import numpy as np
+import base64
+import matplotlib.pyplot as plt
 
-# # -----------------------
-# # Function to set background
-# # -----------------------
-# def set_bg(image_file):
-#     with open(image_file, "rb") as f:
-#         data = f.read()
-#     encoded = base64.b64encode(data).decode()
-#     st.markdown(
-#         f"""
-#         <style>
-#         .stApp {{
-#             background-image: url("data:image/jpg;base64,{encoded}");
-#             background-size: cover;
-#             background-position: center;
-#             background-attachment: fixed;
-#         }}
-#         </style>
-#         """,
-#         unsafe_allow_html=True
-#     )
+# -----------------------
+# Function to set background
+# -----------------------
+def set_bg(image_file):
+    with open(image_file, "rb") as f:
+        data = f.read()
+    encoded = base64.b64encode(data).decode()
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-# # Set background
-# set_bg("downloaded.jpg.jpeg")
+# Set background
+set_bg("downloaded.jpg.jpeg")
 
 # # -----------------------
 # # Page config
