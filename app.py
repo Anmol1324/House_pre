@@ -771,81 +771,149 @@ set_bg("downloaded.jpg.jpeg")
 
 
 
-
 import streamlit as st
 import pandas as pd
 import joblib
+import base64
 
-# -----------------------------
-# Page Config
-# -----------------------------
-st.set_page_config(page_title="House Price Prediction", layout="centered")
+# ---------------------------------------------------
+# Page Configuration
+# ---------------------------------------------------
+st.set_page_config(
+    page_title="House Price Prediction",
+    page_icon="🏠",
+    layout="wide"
+)
 
+# ---------------------------------------------------
+# Background Image
+# ---------------------------------------------------
+def add_bg(image_file):
+    try:
+        with open(image_file, "rb") as image:
+            encoded = base64.b64encode(image.read()).decode()
+
+        st.markdown(
+            f"""
+            <style>
+
+            .stApp{{
+                background-image:url("data:image/jpg;base64,{encoded}");
+                background-size:cover;
+                background-position:center;
+                background-repeat:no-repeat;
+                background-attachment:fixed;
+            }}
+
+            .block-container{{
+                background-color:rgba(255,255,255,0.88);
+                padding:2rem;
+                border-radius:15px;
+            }}
+
+            h1,h2,h3{{
+                color:#003366;
+                text-align:center;
+            }}
+
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+    except:
+        pass
+
+
+# Change filename if needed
+add_bg("background.jpg")
+
+# ---------------------------------------------------
+# Load Model
+# ---------------------------------------------------
+@st.cache_resource
+def load_model():
+    model = joblib.load("model.pkl")
+    scaler = joblib.load("scaler.pkl")
+    return model, scaler
+
+
+model, scaler = load_model()
+
+# ---------------------------------------------------
+# Title
+# ---------------------------------------------------
 st.title("🏠 House Price Prediction")
 
-# -----------------------------
-# Load Model & Scaler
-# -----------------------------
-model = joblib.load("model.pkl")
-scaler = joblib.load("scaler.pkl")
+st.write("Enter the house details below.")
 
-# -----------------------------
-# Get Feature Names
-# -----------------------------
+# ---------------------------------------------------
+# Model Features
+# ---------------------------------------------------
 expected_features = list(scaler.feature_names_in_)
 
-st.write("### Enter House Details")
+user_input = {}
 
-user_data = {}
+col1, col2 = st.columns(2)
 
-# -----------------------------
-# Create Inputs
-# -----------------------------
-for feature in expected_features:
+for i, feature in enumerate(expected_features):
 
-    f = feature.lower()
+    feature_lower = feature.lower()
 
-    if "room" in f:
-        user_data[feature] = st.number_input(feature, 1, 20, 3)
-
-    elif "bath" in f:
-        user_data[feature] = st.number_input(feature, 1, 10, 2)
-
-    elif "car" in f:
-        user_data[feature] = st.number_input(feature, 0, 10, 1)
-
-    elif "bed" in f:
-        user_data[feature] = st.number_input(feature, 1, 10, 3)
-
-    elif "distance" in f:
-        user_data[feature] = st.number_input(feature, 0.0, 100.0, 10.0)
-
-    elif "land" in f:
-        user_data[feature] = st.number_input(feature, 0.0, 10000.0, 500.0)
-
-    elif "building" in f:
-        user_data[feature] = st.number_input(feature, 0.0, 5000.0, 150.0)
-
+    if i % 2 == 0:
+        container = col1
     else:
-        user_data[feature] = st.number_input(feature, value=0.0)
+        container = col2
 
-# -----------------------------
+    with container:
+
+        if "room" in feature_lower:
+            user_input[feature] = st.number_input(feature, 1, 20, 3)
+
+        elif "bed" in feature_lower:
+            user_input[feature] = st.number_input(feature, 1, 10, 3)
+
+        elif "bath" in feature_lower:
+            user_input[feature] = st.number_input(feature, 1, 10, 2)
+
+        elif "car" in feature_lower:
+            user_input[feature] = st.number_input(feature, 0, 10, 1)
+
+        elif "distance" in feature_lower:
+            user_input[feature] = st.number_input(feature, 0.0, 100.0, 10.0)
+
+        elif "land" in feature_lower:
+            user_input[feature] = st.number_input(feature, 0.0, 100000.0, 500.0)
+
+        elif "building" in feature_lower:
+            user_input[feature] = st.number_input(feature, 0.0, 5000.0, 150.0)
+
+        else:
+            user_input[feature] = st.number_input(feature, value=0.0)
+
+# ---------------------------------------------------
 # Prediction
-# -----------------------------
-if st.button("Predict House Price"):
+# ---------------------------------------------------
+if st.button("Predict House Price", use_container_width=True):
 
-    input_df = pd.DataFrame([user_data])
+    input_df = pd.DataFrame([user_input])
 
-    input_scaled = scaler.transform(input_df)
+    try:
 
-    prediction = model.predict(input_scaled)
+        scaled = scaler.transform(input_df)
 
-    st.success(f"🏠 Estimated House Price: ₹ {prediction[0]:,.2f}")
+        prediction = model.predict(scaled)
 
-    st.subheader("House Details")
+        st.success(
+            f"🏠 Estimated House Price : ₹ {prediction[0]:,.2f}"
+        )
 
-    st.dataframe(input_df)
+        st.subheader("Input Details")
 
+        st.dataframe(input_df)
+
+    except Exception as e:
+
+        st.error(str(e))
 
 
 
